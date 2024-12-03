@@ -3,7 +3,7 @@ import {IConfigService} from "./config/config.interface";
 import {Telegraf} from "telegraf";
 import {IBotContext} from "./context/context.interface";
 import {Command} from "./command/command";
-import {FilterCommand} from "./command/filterCommand";
+import {MessageHandler} from "./command/message-handler";
 import LocalSession from 'telegraf-session-local'
 
 export class JobHunterBot {
@@ -16,7 +16,7 @@ export class JobHunterBot {
     }
 
     init() {
-        this.commands = [new FilterCommand(this.bot)]
+        this.commands = [new MessageHandler(this.bot)]
 
         for (const command of this.commands) {
             command.handle();
