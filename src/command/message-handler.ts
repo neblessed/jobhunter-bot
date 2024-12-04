@@ -30,12 +30,13 @@ export class MessageHandler extends Command {
         this.bot.hears('Включить приём вакансий ▶', (ctx) => {
             if (!this.filter.position) {
                 ctx.reply('Вы ещё не создали ни одного фильтра ❌');
-            }
-            ctx.reply('Прием вакансий включен ✔', Markup.keyboard(['Остановить поиск вакансий ⏸']));
+            } else {
+                ctx.reply('Прием вакансий включен ✔', Markup.keyboard(['Остановить поиск вакансий ⏸']).resize());
 
-            this.bot.hears('Остановить поиск вакансий ⏸', (ctx) => {
-                ctx.reply('Прием вакансий отключен ✔', this.menu.mainMenu);
-            })
+                this.bot.hears('Остановить поиск вакансий ⏸', (ctx) => {
+                    ctx.reply('Прием вакансий отключен ✔', this.menu.mainMenu);
+                })
+            }
         })
 
         /**
@@ -49,6 +50,25 @@ export class MessageHandler extends Command {
                 ctx.reply('Вы ещё не создали ни одного фильтра ❌');
             }
         })
+
+        /**
+         * Clear current filter
+         */
+        this.bot.hears('Сбросить фильтр 🗑', async (ctx) => {
+            await ctx.reply('Вы уверены, что хотите удалить фильтр?\n\nУдаленные фильтры восстановлению не подлежат', Markup.inlineKeyboard([Markup.button.callback('Да', 'delete-filter'), Markup.button.callback('Нет', 'discard-filter-delete')]));
+
+            this.bot.action('delete-filter', async (ctx) => {
+                Object.keys(this.filter).forEach(key => {
+                    // @ts-ignore
+                    delete this.filter[key];
+                });
+                await ctx.editMessageText('Фильтр удален\n\nТеперь вы можете создать новый 🌐');
+            })
+
+            this.bot.action('discard-filter-delete', async (ctx) => {
+                await ctx.deleteMessage(ctx.update.callback_query.message!.message_id)
+            })
+        });
 
         /**
          * Hear command "Создать фильтр 📟" and handle all actions
