@@ -16,11 +16,21 @@ export class MessageHandler extends Command {
     }
 
     handle(): void {
+        /**
+         * Response when user start bot
+         */
         this.bot.start((ctx) => {
             ctx.reply('Привет, воспользуйся меню 👇🏼', this.menu.mainMenu)
         })
 
+        /**
+         * Hear command "Включить приём вакансий ▶"
+         * Show error when filter is not created yet
+         */
         this.bot.hears('Включить приём вакансий ▶', (ctx) => {
+            if (!this.filter.position) {
+                ctx.reply('Вы ещё не создали ни одного фильтра ❌');
+            }
             ctx.reply('Прием вакансий включен ✔', Markup.keyboard(['Остановить поиск вакансий ⏸']));
 
             this.bot.hears('Остановить поиск вакансий ⏸', (ctx) => {
@@ -28,16 +38,24 @@ export class MessageHandler extends Command {
             })
         })
 
-        this.bot.hears('Мой фильтр ⚡', async (ctx) => {
-            if(this.filter.position){
-                await ctx.reply(`Ваш фильтр:\n\nПозиция: ${this.filter.position}\nГрейд: ${this.filter.grade}\nТип занятости: ${this.filter.type}\nЗП: ${this.filter.salary}\nЛокация: ${this.filter.location}\nЯП: ${this.filter.lang}`);
-            } else{
-                await ctx.reply('Вы ещё не создали ни одного фильтра ❌');
+        /**
+         * Hear command "Мой фильтр ⚡"
+         * Show error when filter is not created yet
+         */
+        this.bot.hears('Мой фильтр ⚡', (ctx) => {
+            if (this.filter.position) {
+                ctx.reply(`Ваш фильтр:\n\nПозиция: ${this.filter.position}\nГрейд: ${this.filter.grade}\nТип занятости: ${this.filter.type}\nЗП: ${this.filter.salary}\nЛокация: ${this.filter.location}\nЯП: ${this.filter.lang}`);
+            } else {
+                ctx.reply('Вы ещё не создали ни одного фильтра ❌');
             }
         })
 
-        this.bot.hears('Создать фильтр 📟', async (ctx) => {
-            await this.filterMessages.jobPosition(ctx);
+        /**
+         * Hear command "Создать фильтр 📟" and handle all actions
+         * Here is creating user filter
+         */
+        this.bot.hears('Создать фильтр 📟', (ctx) => {
+            this.filterMessages.jobPosition(ctx);
 
             /**
              * Handle "position" actions
