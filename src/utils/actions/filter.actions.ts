@@ -35,12 +35,12 @@ class FilterActions {
 
     salary = {
         noMatter: 'noMatterK',
-        k80: '50-80k',
-        k150: '100-150k',
-        k250: '150-250k',
+        k80: '80k',
+        k150: '150k',
+        k250: '250k',
     }
 
-    programmingLanguage = {
+    lang = {
         noMatter: 'langNoMatter',
         java: 'java',
         python: 'python',

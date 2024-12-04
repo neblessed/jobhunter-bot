@@ -53,24 +53,24 @@ export class InlineKeyboards {
 
     salary = Markup.inlineKeyboard([
         [Markup.button.callback('Не важно', actions.salary.noMatter)],
-        [Markup.button.callback('50-80k RUB', actions.salary.k80)],
-        [Markup.button.callback('90-120k RUB', actions.salary.k150)],
-        [Markup.button.callback('120-150k RUB', actions.salary.k250)]
+        [Markup.button.callback('от 80k RUB', actions.salary.k80)],
+        [Markup.button.callback('от 150k RUB', actions.salary.k150)],
+        [Markup.button.callback('от 250k RUB', actions.salary.k250)]
     ]);
 
     programmingLanguage = Markup.inlineKeyboard([
         [
-            Markup.button.callback('Java', actions.programmingLanguage.java),
-            Markup.button.callback('Python', actions.programmingLanguage.python)
+            Markup.button.callback('Java', actions.lang.java),
+            Markup.button.callback('Python', actions.lang.python)
         ],
         [
-            Markup.button.callback('JavaScript', actions.programmingLanguage.jsTs),
-            Markup.button.callback('Kotlin', actions.programmingLanguage.kotlin)
+            Markup.button.callback('JS/TS', actions.lang.jsTs),
+            Markup.button.callback('Kotlin', actions.lang.kotlin)
         ],
         [
-            Markup.button.callback('Golang', actions.programmingLanguage.golang),
-            Markup.button.callback('C', actions.programmingLanguage.c)
+            Markup.button.callback('Golang', actions.lang.golang),
+            Markup.button.callback('C', actions.lang.c)
         ],
-        [Markup.button.callback('Пропустить', actions.programmingLanguage.noMatter)]
+        [Markup.button.callback('Пропустить', actions.lang.noMatter)]
     ]);
 }
