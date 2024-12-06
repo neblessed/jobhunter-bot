@@ -1,6 +1,8 @@
 import {tgConfig} from "./admin-config";
 import {Api, TelegramClient} from "telegram";
 import {StringSession} from "telegram/sessions";
+import {adminUsernames} from "./admin-settings";
+import readline from "readline";
 
 export class AuthController {
     private readonly mtp;
@@ -22,20 +24,20 @@ export class AuthController {
                 apiHash: tgConfig.telegram.hash,
                 settings: new Api.CodeSettings({
                     allowFlashcall: false,
-                    currentNumber: false,
-                    allowAppHash: false,
+                    currentNumber: true,
+                    allowAppHash: true,
                 }),
-            })).then(async (response) => {
+            })).then((response) => {
+                console.log(response);
                 if (response.className === 'auth.SentCode') {
                     return {phoneCodeHash: response.phoneCodeHash}
                 } else return 'Ошибка при парсинге успешного ответа'
             });
         } catch (e) {
-            codeOrMessage = 'Ошибка при отправке кода'
+            codeOrMessage = `Ошибка при отправке кода:\n${(e as Error).message}`
         }
         return codeOrMessage;
     }
-
 
     /**
      * Используем полученный код и хэш для авторизации

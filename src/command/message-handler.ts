@@ -7,6 +7,8 @@ import {actions} from "../utils/actions/filter.actions";
 import {FilterType} from "../utils/types/filter.type";
 import {adminUsernames} from "../service/auth/admin-settings";
 import {AuthController} from "../service/auth/auth.controller";
+import {message} from "telegraf/filters";
+import * as readline from "readline";
 
 export class MessageHandler extends Command {
     private menu = new Menu();
@@ -26,18 +28,19 @@ export class MessageHandler extends Command {
             ctx.reply('Привет, воспользуйся меню 👇🏼', this.menu.mainMenu)
 
             if (adminUsernames.includes(ctx.from.username!) && (await this.auth.isAuthNeeded())) {
-                ctx.reply('Нужно авторизоваться', Markup.inlineKeyboard([Markup.button.callback('Получить код', 'auth-send-code')]));
+                const rl = readline.createInterface({
+                    input: process.stdin,
+                    output: process.stdout
+                });
+                const response = await this.auth.sendCode();
 
-                this.bot.action('auth-send-code', async (ctx) => {
-                    const response = await this.auth.sendCode()
-
-                    if (typeof response === 'string') {
-                        ctx.editMessageText(response)
-                    } else {
-                        // TODO Дописать обработку ответа пользователя
-                        ctx.reply('Отправьте код подтверждения в ответ на это сообщение');
-                    }
-                })
+                if (typeof response === 'string') {
+                    console.warn(response);
+                } else {
+                    await rl.question('enter the code: ', async (code) => {
+                        await this.auth.signIn(response.phoneCodeHash, code)
+                    })
+                }
             }
         })
 
