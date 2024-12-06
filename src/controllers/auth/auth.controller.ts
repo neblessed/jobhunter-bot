@@ -1,7 +1,6 @@
 import {tgConfig} from "./admin-config";
 import {Api, TelegramClient} from "telegram";
 import {StringSession} from "telegram/sessions";
-import {adminUsernames} from "./admin-settings";
 import readline from "readline";
 
 export class AuthController {
@@ -15,7 +14,7 @@ export class AuthController {
     /**
      * Запрашиваем код
      */
-    async sendCode() {
+    private async sendCode() {
         let codeOrMessage: string | { phoneCodeHash: string };
         try {
             codeOrMessage = await this.mtp.invoke(new Api.auth.SendCode({
@@ -42,7 +41,7 @@ export class AuthController {
     /**
      * Используем полученный код и хэш для авторизации
      */
-    async signIn(phoneCodeHash: string, code: string) {
+    private async signIn(phoneCodeHash: string, code: string) {
         return (await this.mtp.invoke(new Api.auth.SignIn({
             phoneCode: code,
             phoneNumber: tgConfig.telegram.phone,
@@ -50,7 +49,10 @@ export class AuthController {
         })));
     }
 
-    async isAuthNeeded() {
+    /**
+     * Проверяем, авторизован ли бот
+     */
+    private async isAuthNeeded() {
         let state;
 
         try {
@@ -61,5 +63,26 @@ export class AuthController {
         }
 
         return state;
+    }
+
+    /**
+     * Авторизуемся, запрашивая код
+     */
+    async signInIfNeeded(){
+        if ((await this.isAuthNeeded())) {
+            const rl = readline.createInterface({
+                input: process.stdin,
+                output: process.stdout
+            });
+            const response = await this.sendCode();
+
+            if (typeof response === 'string') {
+                console.warn(response);
+            } else {
+                await rl.question('enter the code from telegram: ', async (code) => {
+                    await this.signIn(response.phoneCodeHash, code)
+                })
+            }
+        }
     }
 }

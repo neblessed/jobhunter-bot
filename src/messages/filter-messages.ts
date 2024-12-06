@@ -1,6 +1,6 @@
 import {InlineKeyboards} from "../keyboards/inline";
 import {Context, Markup} from "telegraf";
-import {FilterType} from "../utils/types/filter.type";
+import {UserFilterType} from "../controllers/filter/types/filter.type";
 
 export class FilterMessages {
     private inlineKeyboards = new InlineKeyboards();
@@ -13,23 +13,23 @@ export class FilterMessages {
         await ctx.editMessageText('Ваш грейд:', this.inlineKeyboards.grade);
     }
 
-    async type(ctx: Context){
+    async type(ctx: Context) {
         await ctx.editMessageText('Формат работы:', this.inlineKeyboards.type)
     }
 
-    async location(ctx: Context){
+    async location(ctx: Context) {
         await ctx.editMessageText('Предпочитаемая локация:', this.inlineKeyboards.location)
     }
 
-    async salary(ctx: Context){
+    async salary(ctx: Context) {
         await ctx.editMessageText('Предпочитаемая зарплата:', this.inlineKeyboards.salary)
     }
 
-    async programmingLanguage(ctx: Context){
+    async programmingLanguage(ctx: Context) {
         await ctx.editMessageText('Выберите один из языков программирования, которым владеете:', this.inlineKeyboards.programmingLanguage)
     }
 
-    async filterResult(ctx: Context, filter: FilterType){
+    async filterResult(ctx: Context, filter: UserFilterType) {
         await ctx.editMessageText(`Создать ваш фильтр?\n\nПозиция: ${filter.position}\nГрейд: ${filter.grade}\nТип занятости: ${filter.type}\nЗП: ${filter.salary}\nЛокация: ${filter.location}\nЯП: ${filter.lang}`, Markup.inlineKeyboard([Markup.button.callback('Да', 'create-filter'), Markup.button.callback('Нет', 'revoke-filter')]))
     }
 }

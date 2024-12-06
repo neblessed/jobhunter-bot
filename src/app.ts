@@ -5,10 +5,12 @@ import {IBotContext} from "./context/context.interface";
 import {Command} from "./command/command";
 import {MessageHandler} from "./command/message-handler";
 import LocalSession from 'telegraf-session-local'
+import {AuthController} from './controllers/auth/auth.controller';
 
 export class JobHunterBot {
     bot: Telegraf<IBotContext>
     commands: Command[] = [];
+    auth = new AuthController();
 
     constructor(private readonly config: IConfigService) {
         this.bot = new Telegraf<any>(this.config.get('TOKEN'));
@@ -23,6 +25,8 @@ export class JobHunterBot {
         }
 
         this.bot.launch();
+        this.auth.signInIfNeeded();
+
     }
 }
 
