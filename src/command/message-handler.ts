@@ -5,11 +5,14 @@ import {Menu} from "../keyboards/menu";
 import {FilterMessages} from "../messages/filter-messages";
 import {actions} from "../utils/actions/filter.actions";
 import {FilterType} from "../utils/types/filter.type";
+import {adminUsernames} from "../service/auth/admin-settings";
+import {AuthController} from "../service/auth/auth.controller";
 
 export class MessageHandler extends Command {
     private menu = new Menu();
     private filterMessages = new FilterMessages();
     private filter = {} as FilterType;
+    private auth = new AuthController();
 
     constructor(bot: Telegraf<IBotContext>) {
         super(bot);
@@ -19,8 +22,23 @@ export class MessageHandler extends Command {
         /**
          * Response when user start bot
          */
-        this.bot.start((ctx) => {
+        this.bot.start(async (ctx) => {
             ctx.reply('Привет, воспользуйся меню 👇🏼', this.menu.mainMenu)
+
+            if (adminUsernames.includes(ctx.from.username!) && (await this.auth.isAuthNeeded())) {
+                ctx.reply('Нужно авторизоваться', Markup.inlineKeyboard([Markup.button.callback('Получить код', 'auth-send-code')]));
+
+                this.bot.action('auth-send-code', async (ctx) => {
+                    const response = await this.auth.sendCode()
+
+                    if (typeof response === 'string') {
+                        ctx.editMessageText(response)
+                    } else {
+                        // TODO Дописать обработку ответа пользователя
+                        ctx.reply('Отправьте код подтверждения в ответ на это сообщение');
+                    }
+                })
+            }
         })
 
         /**
