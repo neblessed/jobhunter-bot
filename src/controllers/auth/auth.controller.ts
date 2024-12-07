@@ -1,17 +1,15 @@
 import {tgConfig} from "./admin-config";
 import {Api, TelegramClient} from "telegram";
-import {StoreSession, StringSession} from "telegram/sessions";
+import {StoreSession} from "telegram/sessions";
 import readline from "readline";
-import fs from "fs";
+// @ts-ignore
+import input from 'input'; // npm install input
 
 export class AuthController {
-    private readonly path = `src/storage/admin-sessions.json`;
     private readonly mtp;
-    private readonly stringSession = new StringSession('');
 
     constructor() {
-        // this.mtp = this.createStringSession();
-        this.mtp = new TelegramClient(this.stringSession, tgConfig.telegram.id, tgConfig.telegram.hash!, {connectionRetries: 1});
+        this.mtp = new TelegramClient(new StoreSession('admin-sessions'), tgConfig.telegram.id, tgConfig.telegram.hash!, {connectionRetries: 1});
     }
 
     /**
@@ -70,19 +68,20 @@ export class AuthController {
     }
 
     private async connectWithSaveSession() {
-        await this.mtp.connect();
-        this.addInStorageIfNotExists(this.stringSession.save());
-
-        const storeSession = new StoreSession("my_session");
-        console.log(storeSession.save())
+        await this.mtp.start({
+            phoneNumber: async () => tgConfig.telegram.phone!,
+            phoneCode: async () => {
+                return await input.text('type code:');
+            },
+            onError: (err) => console.log(err),
+        });
     }
 
     /**
      * Авторизуемся, запрашивая код
      */
     async signInIfNeeded() {
-        // await this.connectWithSaveSession();
-        await this.mtp.connect();
+        await this.connectWithSaveSession();
         if (await this.isAuthNeeded()) {
             const rl = readline.createInterface({
                 input: process.stdin,
@@ -100,54 +99,20 @@ export class AuthController {
         }
     }
 
-    private getLatestSessionIfExists() {
-        const {sessions} = this.readStorage();
-
-        return sessions.at(-1);
-    }
-
-    private createStringSession() {
-        const exists = this.getLatestSessionIfExists();
-        if (exists) {
-            console.log('found created session')
-            return new TelegramClient(new StringSession(exists), tgConfig.telegram.id, tgConfig.telegram.hash!, {connectionRetries: 1});
-        } else {
-            return new TelegramClient(this.stringSession, tgConfig.telegram.id, tgConfig.telegram.hash!, {connectionRetries: 1});
-        }
-    }
-
-    private addInStorageIfNotExists(session: string) {
-        const {sessions} = this.readStorage();
-
-        if (!sessions.includes(session)) {
-            sessions.push(session);
-            this.updateStorage(sessions);
-        }
-    }
-
-    /**
-     * Перезаписывает storage
-     */
-    private updateStorage(sessions: string[]) {
-        fs.writeFile(this.path, JSON.stringify({sessions}, null, 2), 'utf8', writeErr => {
-            if (writeErr) {
-                console.error('Ошибка при записи файла:', writeErr);
-            } else {
-                console.log('Сессии обновлены');
-            }
-        });
-    }
-
-    /**
-     * Читает storage
-     */
-    private readStorage(): { sessions: string[] } {
-        const data = fs.readFileSync(this.path, 'utf8');
-
-        if (!data) {
-            throw new Error(`Error while parse storage (${this.path})`);
-        } else {
-            return JSON.parse(data);
+    async getLatestMessagesFromChannel(channel: string, limit: number) {
+        const peer = await this.mtp.getInputEntity(channel);
+        const result = await this.mtp.invoke(
+            new Api.messages.GetHistory({
+                peer,
+                limit,
+            })
+        );
+        if (result.className !== 'messages.MessagesNotModified') {
+            return result.messages.map(msg => {
+                if (msg.className === 'Message') {
+                    return msg.message;
+                }
+            });
         }
     }
 }

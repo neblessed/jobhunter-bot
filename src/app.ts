@@ -23,7 +23,7 @@ export class JobHunterBot {
         }
 
         this.bot.launch();
-        // this.auth.signInIfNeeded();
+        this.auth.signInIfNeeded();
     }
 }
 
