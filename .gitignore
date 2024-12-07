@@ -1,5 +1,7 @@
 /node_modules
 /dist
-/.idea
+.idea
 .env
 sessions.json
+/src/storage/user-filters.json
+/src/storage/admin-sessions.json

@@ -1,31 +1,32 @@
-import {ConfigService} from "./config/config.service";
-import {IConfigService} from "./config/config.interface";
 import {Telegraf} from "telegraf";
 import {IBotContext} from "./context/context.interface";
 import {Command} from "./command/command";
-import {FilterCommand} from "./command/filterCommand";
+import {MessageHandler} from "./command/message-handler";
 import LocalSession from 'telegraf-session-local'
+import {AuthController} from './controllers/auth/auth.controller';
 
 export class JobHunterBot {
     bot: Telegraf<IBotContext>
     commands: Command[] = [];
+    auth = new AuthController();
 
-    constructor(private readonly config: IConfigService) {
-        this.bot = new Telegraf<any>(this.config.get('TOKEN'));
+    constructor() {
+        this.bot = new Telegraf<any>(process.env.TOKEN!);
         this.bot.use(new LocalSession({database: 'sessions.json'}).middleware())
     }
 
     init() {
-        this.commands = [new FilterCommand(this.bot)]
+        this.commands = [new MessageHandler(this.bot)]
 
         for (const command of this.commands) {
             command.handle();
         }
 
         this.bot.launch();
+        // this.auth.signInIfNeeded();
     }
 }
 
-const bot = new JobHunterBot(new ConfigService());
+const bot = new JobHunterBot();
 bot.init();
 console.log('bot is running now👌🏼')
