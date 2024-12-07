@@ -3,4 +3,5 @@
 .idea
 .env
 sessions.json
-src\storage
+/src/storage/user-filters.json
+/src/storage/admin-sessions.json
