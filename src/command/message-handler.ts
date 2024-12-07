@@ -45,7 +45,8 @@ export class MessageHandler extends Command {
          * Обработка команды "Фильтр ⚡"
          */
         this.bot.hears('Фильтр ⚡', (hearsCtx) => {
-            const userId = hearsCtx.chat.id;
+            const userId = hearsCtx.update.message.from.id;
+            console.log('test', userId)
             hearsCtx.reply('Панель управления фильтрами 🛰', this.menu.filterMenu);
 
             /**

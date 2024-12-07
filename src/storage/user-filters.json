@@ -1,13 +1,3 @@
 {
-  "filters": [
-    {
-      "user_id": 765707926,
-      "position": "QA Automation",
-      "grade": "Middle",
-      "type": "Удаленно",
-      "location": "Россия",
-      "salary": "от 250k RUB",
-      "lang": "JS/TS"
-    }
-  ]
+  "filters": []
 }
