@@ -1,5 +1,3 @@
-import {ConfigService} from "./config/config.service";
-import {IConfigService} from "./config/config.interface";
 import {Telegraf} from "telegraf";
 import {IBotContext} from "./context/context.interface";
 import {Command} from "./command/command";
@@ -12,8 +10,8 @@ export class JobHunterBot {
     commands: Command[] = [];
     auth = new AuthController();
 
-    constructor(private readonly config: IConfigService) {
-        this.bot = new Telegraf<any>(this.config.get('TOKEN'));
+    constructor() {
+        this.bot = new Telegraf<any>(process.env.TOKEN!);
         this.bot.use(new LocalSession({database: 'sessions.json'}).middleware())
     }
 
@@ -29,6 +27,6 @@ export class JobHunterBot {
     }
 }
 
-const bot = new JobHunterBot(new ConfigService());
+const bot = new JobHunterBot();
 bot.init();
 console.log('bot is running now👌🏼')
