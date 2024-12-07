@@ -45,14 +45,13 @@ export class MessageHandler extends Command {
          * Обработка команды "Фильтр ⚡"
          */
         this.bot.hears('Фильтр ⚡', (hearsCtx) => {
-            const userId = hearsCtx.update.message.from.id;
-            console.log('test', userId)
             hearsCtx.reply('Панель управления фильтрами 🛰', this.menu.filterMenu);
 
             /**
              * Обработка команды "Показать фильтр 👀"
              */
             this.bot.hears('Показать фильтр 👀', (ctx) => {
+                const userId = ctx.update.message.from.id;
                 const userFilter = this.filterController.getUserFilterFromStorage(userId);
 
                 if (userFilter) {

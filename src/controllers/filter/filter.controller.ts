@@ -24,7 +24,7 @@ export class FilterController {
     getUserFilterFromStorage(userId: number) {
         const filters = this.readStorage();
 
-        return filters.find(f => f.user_id === userId);
+        return filters.find(f => f.user_id == userId);
     }
 
     /**
