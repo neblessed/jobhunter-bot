@@ -331,29 +331,6 @@ export class MessageHandler extends Command {
                                 ponCtx.reply('👉🏼 В ответ на это сообщение пришлите список каналов для добавления в отслеживаемые\n\n⚠️ Каждый канал должен начинаться с новой строки')
                             });
                         });
-
-                        /**
-                         * Слушаем сообщение пользователя
-                         */
-                        this.bot.on('text', async (updateCtx) => {
-                            const message = updateCtx.message;
-                            const userId = message.from.id;
-                            // @ts-ignore
-                            if (message && message.reply_to_message && message.reply_to_message.from.is_bot) {
-                                const parsedChannels = validator.parseChannelsFromMessage(message.text);
-
-                                if (typeof parsedChannels === 'string') {
-                                    updateCtx.reply(parsedChannels);
-                                } else {
-                                    if (userFilter.channels.length + parsedChannels.length > 5) {
-                                        updateCtx.reply(`Превышен лимит на добавление каналов 👀\nВы можете добавить еще ${5 - userFilter.channels.length}`)
-                                    } else {
-                                        this.filterController.addUserChannels(userId, parsedChannels);
-                                        updateCtx.reply('Список каналов успешно обновлен 👍🏼');
-                                    }
-                                }
-                            }
-                        });
                     }
                 });
 
@@ -361,17 +338,38 @@ export class MessageHandler extends Command {
                     settingsAddCtx.reply('👉🏼 В ответ на это сообщение пришлите список каналов для удаления из отслеживаемых\n\n⚠️ Каждый канал должен начинаться с новой строки', {
                         parse_mode: 'Markdown'
                     });
+                });
 
-                    this.bot.on('text', async (updateCtx) => {
-                        const message = updateCtx.message;
-                        const userId = message.from.id;
-                        console.log(message);
-                        if (message
-                            && message.reply_to_message
-                            // @ts-ignore
-                            && (message.reply_to_message.text as string).includes('В ответ на это сообщение пришлите список каналов для удаления')) {
-                            const parsedChannels = validator.parseChannelsFromMessage(message.text);
+                /**
+                 * Слушаем сообщение пользователя
+                 */
+                this.bot.on('text', (updateCtx) => {
+                    const message = updateCtx.message;
+                    const userId = message.from.id;
+                    // @ts-ignore
+                    const isReplyToBot = message && message.reply_to_message && message.reply_to_message.from.is_bot
 
+                    if (isReplyToBot) {
+                        const parsedChannels = validator.parseChannelsFromMessage(message.text);
+
+                        // @ts-ignore
+                        const messageText = message.reply_to_message.text as string;
+
+                        if (messageText.includes('список каналов для добавления')) {
+                            const {channels} = this.filterController.getUserFilterFromStorage(userId)!;
+                            if (typeof parsedChannels === 'string') {
+                                updateCtx.reply(parsedChannels);
+                            } else {
+                                if (channels.length + parsedChannels.length > 5) {
+                                    updateCtx.reply(`Превышен лимит на добавление каналов 👀\nВы можете добавить еще ${5 - channels.length}`)
+                                } else {
+                                    this.filterController.addUserChannels(userId, parsedChannels);
+                                    updateCtx.reply('Список каналов успешно обновлен 👍🏼');
+                                }
+                            }
+                        }
+
+                        if (messageText.includes('список каналов для удаления')) {
                             if (typeof parsedChannels === 'string') {
                                 updateCtx.reply(parsedChannels);
                             } else {
@@ -379,7 +377,7 @@ export class MessageHandler extends Command {
                                 updateCtx.reply('Список каналов успешно обновлен 👍🏼')
                             }
                         }
-                    });
+                    }
                 });
             }
         })
