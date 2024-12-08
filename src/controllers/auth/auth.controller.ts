@@ -1,16 +1,13 @@
 import {tgConfig} from "./admin-config";
 import {Api, TelegramClient} from "telegram";
-import {StoreSession} from "telegram/sessions";
 import readline from "readline";
 // @ts-ignore
-import input from 'input'; // npm install input
+import input from 'input';
+import {Mtp} from "../mtp/mtp.class";
+import {MessageFetchController} from "../fetcher/message-fetch.controller";
 
 export class AuthController {
-    private readonly mtp;
-
-    constructor() {
-        this.mtp = new TelegramClient(new StoreSession('admin-sessions'), tgConfig.telegram.id, tgConfig.telegram.hash!, {connectionRetries: 1});
-    }
+    readonly mtp = Mtp.getInstance();
 
     /**
      * Запрашиваем код
@@ -92,27 +89,10 @@ export class AuthController {
             if (typeof response === 'string') {
                 console.warn(response);
             } else {
-                await rl.question('enter code:', async (code) => {
+                await rl.question('enter code: ', async (code) => {
                     await this.signIn(response.phoneCodeHash, code)
                 })
             }
-        }
-    }
-
-    async getLatestMessagesFromChannel(channel: string, limit: number) {
-        const peer = await this.mtp.getInputEntity(channel);
-        const result = await this.mtp.invoke(
-            new Api.messages.GetHistory({
-                peer,
-                limit,
-            })
-        );
-        if (result.className !== 'messages.MessagesNotModified') {
-            return result.messages.map(msg => {
-                if (msg.className === 'Message') {
-                    return msg.message;
-                }
-            });
         }
     }
 }

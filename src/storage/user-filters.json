@@ -3,6 +3,9 @@
     {
       "user_id": 765707926,
       "position": "QA Automation",
+      "baseChannels": [
+        "qa_jobs"
+      ],
       "grade": "Middle",
       "type": "Удаленно",
       "location": "Россия",

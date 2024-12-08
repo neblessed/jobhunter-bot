@@ -6,6 +6,7 @@ import {FilterMessages} from "../messages/filter-messages";
 import {actions} from "../utils/actions/filter.actions";
 import {FilterController} from "../controllers/filter/filter.controller";
 import {adminUsernames} from "../controllers/auth/admin-settings";
+import {channels} from "../utils/channels/channel-mapping";
 
 
 export class MessageHandler extends Command {
@@ -22,7 +23,7 @@ export class MessageHandler extends Command {
          * start
          */
         this.bot.start((ctx) => {
-            ctx.reply(`Привет ${ctx.from.username}! Воспользуйся меню 👇🏼`, this.menu.mainMenu)
+            ctx.reply(`Привет ${ctx.from.first_name}! Воспользуйся меню 👇🏼`, this.menu.mainMenu)
         })
 
         /**
@@ -101,21 +102,25 @@ export class MessageHandler extends Command {
                 this.bot.action(actions.position.qa, (ctx) => {
                     this.filterController.addKeyInFilter('user_id', userId)
                     this.filterController.addKeyInFilter('position', 'QA Engineer');
+                    this.filterController.addKeyInFilter('baseChannels', channels.qaChannels);
                     this.filterMessages.grade(ctx);
                 });
                 this.bot.action(actions.position.aqa, (ctx) => {
                     this.filterController.addKeyInFilter('user_id', userId)
                     this.filterController.addKeyInFilter('position', 'QA Automation');
+                    this.filterController.addKeyInFilter('baseChannels', channels.aqaChannels);
                     this.filterMessages.grade(ctx);
                 });
                 this.bot.action(actions.position.feDev, (ctx) => {
                     this.filterController.addKeyInFilter('user_id', userId)
                     this.filterController.addKeyInFilter('position', 'Frontend Developer');
+                    this.filterController.addKeyInFilter('baseChannels', channels.feDevChannels);
                     this.filterMessages.grade(ctx);
                 });
                 this.bot.action(actions.position.beDev, (ctx) => {
                     this.filterController.addKeyInFilter('user_id', userId)
                     this.filterController.addKeyInFilter('position', 'Backend Developer');
+                    this.filterController.addKeyInFilter('baseChannels', channels.beDevChannels);
                     this.filterMessages.grade(ctx);
                 });
 
