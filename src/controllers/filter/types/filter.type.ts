@@ -6,5 +6,5 @@ export type UserFilterType = {
     salary: string,         // зп
     location: string,       // локация
     lang: string            // яп
-    baseChannels: string[]  // каналы
+    channels: string[]  // каналы
 }

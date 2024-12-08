@@ -1,6 +1,6 @@
 class ChannelMapping {
     qaChannels = ['qa_jobs'];
-    aqaChannels = [];
+    aqaChannels = ['qa_jobs'];
     feDevChannels = [];
     beDevChannels = [];
 }

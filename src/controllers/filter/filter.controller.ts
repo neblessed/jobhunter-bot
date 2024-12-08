@@ -74,10 +74,54 @@ export class FilterController {
     /**
      * Очищает текущий wip-фильтр
      */
-    flushCurrentFilter(){
+    flushCurrentFilter() {
         Object.keys(this.userFilter).forEach(key => {
             // @ts-ignore
             delete this.userFilter[key];
         });
+    }
+
+    addUserChannels(userId: number, newChannels: string[]) {
+        const filters = this.readStorage();
+        const userFilter = filters.find(f => f.user_id == userId)!;
+        const {channels} = userFilter;
+
+        newChannels.forEach(channel => {
+            if (!channels.includes(channel)) {
+                channels.push(channel);
+            }
+        });
+        filters.map(filter => {
+            if (filter.user_id == userId) {
+                filter.channels = channels;
+                return filter;
+            }
+        })
+
+        this.updateStorage({filters})
+    }
+
+    removeUserChannels(userId: number, updatedChannels: string[]): void | string {
+        const filters = this.readStorage();
+        const userFilter = filters.find(f => f.user_id == userId)!;
+        let {channels} = userFilter;
+        const isExists = channels.some(item => updatedChannels.includes(item));
+
+        if (isExists) {
+            channels = channels.filter(channel => {
+                if (!updatedChannels.includes(channel)) {
+                    return channel;
+                }
+            });
+
+            filters.map(filter => {
+                if (filter.user_id == userId) {
+                    filter.channels = channels;
+                    return filter;
+                }
+            })
+
+            this.updateStorage({filters})
+        }
     }
 }

@@ -7,6 +7,7 @@ import {actions} from "../utils/actions/filter.actions";
 import {FilterController} from "../controllers/filter/filter.controller";
 import {adminUsernames} from "../controllers/auth/admin-settings";
 import {channels} from "../utils/channels/channel-mapping";
+import {validator} from "../utils/message-validator";
 
 
 export class MessageHandler extends Command {
@@ -102,25 +103,25 @@ export class MessageHandler extends Command {
                 this.bot.action(actions.position.qa, (ctx) => {
                     this.filterController.addKeyInFilter('user_id', userId)
                     this.filterController.addKeyInFilter('position', 'QA Engineer');
-                    this.filterController.addKeyInFilter('baseChannels', channels.qaChannels);
+                    this.filterController.addKeyInFilter('channels', channels.qaChannels);
                     this.filterMessages.grade(ctx);
                 });
                 this.bot.action(actions.position.aqa, (ctx) => {
                     this.filterController.addKeyInFilter('user_id', userId)
                     this.filterController.addKeyInFilter('position', 'QA Automation');
-                    this.filterController.addKeyInFilter('baseChannels', channels.aqaChannels);
+                    this.filterController.addKeyInFilter('channels', channels.aqaChannels);
                     this.filterMessages.grade(ctx);
                 });
                 this.bot.action(actions.position.feDev, (ctx) => {
                     this.filterController.addKeyInFilter('user_id', userId)
                     this.filterController.addKeyInFilter('position', 'Frontend Developer');
-                    this.filterController.addKeyInFilter('baseChannels', channels.feDevChannels);
+                    this.filterController.addKeyInFilter('channels', channels.feDevChannels);
                     this.filterMessages.grade(ctx);
                 });
                 this.bot.action(actions.position.beDev, (ctx) => {
                     this.filterController.addKeyInFilter('user_id', userId)
                     this.filterController.addKeyInFilter('position', 'Backend Developer');
-                    this.filterController.addKeyInFilter('baseChannels', channels.beDevChannels);
+                    this.filterController.addKeyInFilter('channels', channels.beDevChannels);
                     this.filterMessages.grade(ctx);
                 });
 
@@ -280,53 +281,93 @@ export class MessageHandler extends Command {
         });
 
         this.bot.hears('Настройки ⚙', (ctx) => {
-            ctx.reply('*Добро пожаловать в настройки каналов ✋🏼*\n\nВ этом разделе вы можете:\n◽посмотреть список каналов за которыми следит бот\n◽добавить новый канал\n◽удалить канал из списка', {
-                reply_markup: this.menu.settingsMenu.reply_markup,
-                parse_mode: 'Markdown'
-            });
+            const userId = ctx.update.message.from.id;
+            const userFilter = this.filterController.getUserFilterFromStorage(userId);
 
-            /**
-             * Обработка запроса списка каналов из фильтра
-             */
-            this.bot.hears('Мои каналы 📋', (settingsCtx) => {
-                const userId = settingsCtx.update.message.from.id;
-                const userFilter = this.filterController.getUserFilterFromStorage(userId);
-
-                if (userFilter) {
-                    if (userFilter.baseChannels.length >= 1) {
-                        const channelsAsText = userFilter.baseChannels.map(c => `\n🎯 @${c}`).join('');
-                        settingsCtx.reply(`Для вас бот отслеживает следующие каналы: ${channelsAsText}`)
-                    } else {
-                        settingsCtx.reply('*Список каналов для отслеживания пуст*\n\nВоспользуйтесь функцией *Добавить ➕*', {parse_mode: 'Markdown'});
-                    }
-                } else {
-                    settingsCtx.reply('Вы ещё не создали ни одного фильтра ❌');
-                }
-            });
-
-            this.bot.hears('Добавить ➕', (settingsAddCtx) => {
-                settingsAddCtx.reply('*Функция добавления канала в список отслеживаемых*\n\n⚠ Каждый канал должен начинаться с новой строки', {
-                    reply_markup: Markup.inlineKeyboard([Markup.button.callback('Все равно не понятно 🙁', 'still-idk')]).reply_markup,
+            if (!userFilter) {
+                ctx.reply('Вы ещё не создали ни одного фильтра ❌');
+            } else {
+                ctx.reply('*Добро пожаловать в настройки каналов!*\n\nВ этом разделе вы можете:\n◽посмотреть список каналов за которыми следит бот\n◽добавить новый канал\n◽удалить канал из списка', {
+                    reply_markup: this.menu.settingsMenu.reply_markup,
                     parse_mode: 'Markdown'
-                })
-
-                this.bot.action('still-idk', (idkCtx) => {
-                    idkCtx.replyWithVideo({
-                        source: 'src/assets/copy-link-example.mp4'
-                    }, {
-                        caption: 'Юзернейм отображается в профиле любого *публичного* канала\n\n*Например:* ``` https://t.me/test-channel ```В этом примере *test-channel* является юзернеймом канала\n\n```Пример-сообщения-боту\nсhannel1\nchannel2\nchannel3```',
-                        parse_mode: 'Markdown'
-                    })
                 });
 
                 /**
-                 * Слушаем сообщение пользователя
+                 * Обработка запроса списка каналов из фильтра
                  */
-                this.bot.on('text', (updateCtx) => {
-                    // TODO wip
-                    console.log(updateCtx.message.text)
-                })
-            })
+                this.bot.hears('Мои каналы 📋', (settingsCtx) => {
+                    const current = this.filterController.getUserFilterFromStorage(settingsCtx.update.message.from.id)!;
+
+                    if (current.channels.length >= 1) {
+                        const channelsAsText = current.channels.map(c => `\n@${c}`).join('');
+                        settingsCtx.reply(`Для вас бот отслеживает: ${channelsAsText}`)
+                    } else {
+                        settingsCtx.reply('*Список каналов для отслеживания пуст*\n\nВоспользуйтесь функцией *Добавить ➕*', {parse_mode: 'Markdown'});
+                    }
+                });
+
+                this.bot.hears('Добавить ➕', (settingsAddCtx) => {
+                    settingsAddCtx.reply('*Функция добавления канала в список отслеживаемых*\n\nВ ответ на это сообщение пришлите список каналов для добавления в отслеживаемые\n⚠️ Каждый канал должен начинаться с новой строки', {
+                        reply_markup: Markup.inlineKeyboard([Markup.button.callback('Все равно не понятно 🙁', 'still-idk')]).reply_markup,
+                        parse_mode: 'Markdown'
+                    });
+
+                    this.bot.action('still-idk', (idkCtx) => {
+                        idkCtx.replyWithVideo({
+                            source: 'src/assets/copy-link-example.mp4'
+                        }, {
+                            caption: 'Юзернейм отображается в профиле любого *публичного* канала\n\n*Например:* ``` https://t.me/test-channel ```В этом примере *test-channel* является юзернеймом канала\n\n```Пример-сообщения-боту\nсhannel1\nchannel2\nchannel3```',
+                            parse_mode: 'Markdown',
+                            reply_markup: Markup.inlineKeyboard([Markup.button.callback('Понятно', 'ponchik')]).reply_markup
+                        })
+                    });
+
+                    this.bot.action('ponchik', (ponCtx) => {
+                        ponCtx.reply('В ответ на это сообщение пришлите список каналов для добавления в отслеживаемые\n⚠️ Каждый канал должен начинаться с новой строки')
+                    });
+
+                    /**
+                     * Слушаем сообщение пользователя
+                     */
+                    this.bot.on('text', async (updateCtx) => {
+                        const message = updateCtx.message;
+                        const userId = message.from.id;
+                        // @ts-ignore
+                        if (message && message.reply_to_message && message.reply_to_message.from.is_bot) {
+                            const parsedChannels = validator.parseChannelsFromMessage(message.text);
+
+                            if (typeof parsedChannels === 'string') {
+                                updateCtx.reply(parsedChannels);
+                            } else {
+                                this.filterController.addUserChannels(userId, parsedChannels)
+                                updateCtx.reply('Список каналов успешно обновлен 👍🏼')
+                            }
+                        }
+                    });
+                });
+
+                this.bot.hears('Удалить ➖', (settingsAddCtx) => {
+                    settingsAddCtx.reply('*Функция удаления каналов из списка отслеживаемых*\n\nВ ответ на это сообщение пришлите список каналов для удаления из отслеживаемых\n⚠️ Каждый канал должен начинаться с новой строки', {
+                        parse_mode: 'Markdown'
+                    });
+
+                    this.bot.on('text', async (updateCtx) => {
+                        const message = updateCtx.message;
+                        const userId = message.from.id;
+                        // @ts-ignore
+                        if (message && message.reply_to_message && message.reply_to_message.from.is_bot) {
+                            const parsedChannels = validator.parseChannelsFromMessage(message.text);
+
+                            if (typeof parsedChannels === 'string') {
+                                updateCtx.reply(parsedChannels);
+                            } else {
+                                this.filterController.removeUserChannels(userId, parsedChannels)
+                                updateCtx.reply('Список каналов успешно обновлен 👍🏼')
+                            }
+                        }
+                    });
+                });
+            }
         })
     }
 }
