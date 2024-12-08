@@ -77,10 +77,10 @@ export class MessageHandler extends Command {
                     ctx.deleteMessage(ctx.update.callback_query.message!.message_id)
                 })
             });
+        });
 
-            this.bot.hears('Вернуться в меню 🚪', (ctx) => {
-                ctx.reply('Главное меню 🌎', this.menu.mainMenu);
-            });
+        this.bot.hears('Вернуться в меню 🚪', (ctx) => {
+            ctx.reply('Главное меню 🌎', this.menu.mainMenu);
         });
 
 
@@ -278,5 +278,55 @@ export class MessageHandler extends Command {
                 ctx.editMessageText('Фильтр очищен ✔\nВоспользуйтесь меню, чтобы создать его заново.')
             });
         });
+
+        this.bot.hears('Настройки ⚙', (ctx) => {
+            ctx.reply('*Добро пожаловать в настройки каналов ✋🏼*\n\nВ этом разделе вы можете:\n◽посмотреть список каналов за которыми следит бот\n◽добавить новый канал\n◽удалить канал из списка', {
+                reply_markup: this.menu.settingsMenu.reply_markup,
+                parse_mode: 'Markdown'
+            });
+
+            /**
+             * Обработка запроса списка каналов из фильтра
+             */
+            this.bot.hears('Мои каналы 📋', (settingsCtx) => {
+                const userId = settingsCtx.update.message.from.id;
+                const userFilter = this.filterController.getUserFilterFromStorage(userId);
+
+                if (userFilter) {
+                    if (userFilter.baseChannels.length >= 1) {
+                        const channelsAsText = userFilter.baseChannels.map(c => `\n🎯 @${c}`).join('');
+                        settingsCtx.reply(`Для вас бот отслеживает следующие каналы: ${channelsAsText}`)
+                    } else {
+                        settingsCtx.reply('*Список каналов для отслеживания пуст*\n\nВоспользуйтесь функцией *Добавить ➕*', {parse_mode: 'Markdown'});
+                    }
+                } else {
+                    settingsCtx.reply('Вы ещё не создали ни одного фильтра ❌');
+                }
+            });
+
+            this.bot.hears('Добавить ➕', (settingsAddCtx) => {
+                settingsAddCtx.reply('*Функция добавления канала в список отслеживаемых*\n\n⚠ Каждый канал должен начинаться с новой строки', {
+                    reply_markup: Markup.inlineKeyboard([Markup.button.callback('Все равно не понятно 🙁', 'still-idk')]).reply_markup,
+                    parse_mode: 'Markdown'
+                })
+
+                this.bot.action('still-idk', (idkCtx) => {
+                    idkCtx.replyWithVideo({
+                        source: 'src/assets/copy-link-example.mp4'
+                    }, {
+                        caption: 'Юзернейм отображается в профиле любого *публичного* канала\n\n*Например:* ``` https://t.me/test-channel ```В этом примере *test-channel* является юзернеймом канала\n\n```Пример-сообщения-боту\nсhannel1\nchannel2\nchannel3```',
+                        parse_mode: 'Markdown'
+                    })
+                });
+
+                /**
+                 * Слушаем сообщение пользователя
+                 */
+                this.bot.on('text', (updateCtx) => {
+                    // TODO wip
+                    console.log(updateCtx.message.text)
+                })
+            })
+        })
     }
 }

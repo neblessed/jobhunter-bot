@@ -1,7 +1,7 @@
 import {UserFilterType} from "../filter/types/filter.type";
 import {Mtp} from "../mtp/mtp.class";
 import {Api} from "telegram";
-import {SECONDS_IN_DAY} from "../../utils/time";
+import {SECONDS_IN_DAY} from "../../utils/constants/time";
 
 export class MessageFetchController {
     private readonly mtp = Mtp.getInstance();
