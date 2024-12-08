@@ -3,7 +3,7 @@
     {
       "user_id": 765707926,
       "position": "QA Automation",
-      "baseChannels": [
+      "channels": [
         "qa_jobs"
       ],
       "grade": "Middle",

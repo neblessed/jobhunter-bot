@@ -287,7 +287,7 @@ export class MessageHandler extends Command {
             if (!userFilter) {
                 ctx.reply('Вы ещё не создали ни одного фильтра ❌');
             } else {
-                ctx.reply('*Добро пожаловать в настройки каналов!*\n\nВ этом разделе вы можете:\n◽посмотреть список каналов за которыми следит бот\n◽добавить новый канал\n◽удалить канал из списка', {
+                ctx.reply('*Добро пожаловать в настройки каналов!*\n\nВ этом разделе вы можете:\n◽посмотреть список каналов за которыми следит бот\n◽добавить новый канал\n◽удалить канал из списка\n\n⚡ _Ограничение: 5 каналов для отслеживания_', {
                     reply_markup: this.menu.settingsMenu.reply_markup,
                     parse_mode: 'Markdown'
                 });
@@ -307,55 +307,69 @@ export class MessageHandler extends Command {
                 });
 
                 this.bot.hears('Добавить ➕', (settingsAddCtx) => {
-                    settingsAddCtx.reply('*Функция добавления канала в список отслеживаемых*\n\nВ ответ на это сообщение пришлите список каналов для добавления в отслеживаемые\n⚠️ Каждый канал должен начинаться с новой строки', {
-                        reply_markup: Markup.inlineKeyboard([Markup.button.callback('Все равно не понятно 🙁', 'still-idk')]).reply_markup,
-                        parse_mode: 'Markdown'
-                    });
+                    const currentFilter = this.filterController.getUserFilterFromStorage(settingsAddCtx.update.message.from.id)!;
+                    if (currentFilter.channels.length === 5) {
+                        settingsAddCtx.reply('У вас уже добавлено не менее 5 каналов. Это максимум 👀')
+                    } else {
+                        const possibleDeleted1 = settingsAddCtx.reply('👉🏼 В ответ на это сообщение пришлите список каналов для добавления в отслеживаемые\n\n⚠️ Каждый канал должен начинаться с новой строки', {
+                            reply_markup: Markup.inlineKeyboard([Markup.button.callback('Все равно не понятно 🙁', 'still-idk')]).reply_markup,
+                            parse_mode: 'Markdown'
+                        }).then(message => message.message_id);
 
-                    this.bot.action('still-idk', (idkCtx) => {
-                        idkCtx.replyWithVideo({
-                            source: 'src/assets/copy-link-example.mp4'
-                        }, {
-                            caption: 'Юзернейм отображается в профиле любого *публичного* канала\n\n*Например:* ``` https://t.me/test-channel ```В этом примере *test-channel* является юзернеймом канала\n\n```Пример-сообщения-боту\nсhannel1\nchannel2\nchannel3```',
-                            parse_mode: 'Markdown',
-                            reply_markup: Markup.inlineKeyboard([Markup.button.callback('Понятно', 'ponchik')]).reply_markup
-                        })
-                    });
+                        this.bot.action('still-idk', (idkCtx) => {
+                            const possibleDeleted2 = idkCtx.replyWithVideo({
+                                source: 'src/assets/copy-link-example.mp4'
+                            }, {
+                                caption: 'Юзернейм отображается в профиле любого *публичного* канала\n\n*Например:* ``` https://t.me/test-channel ```В этом примере *test-channel* является юзернеймом канала\n\n```Пример-сообщения-боту\nсhannel1\nchannel2\nchannel3```',
+                                parse_mode: 'Markdown',
+                                reply_markup: Markup.inlineKeyboard([Markup.button.callback('Понятно', 'ponchik')]).reply_markup
+                            }).then(message => message.message_id)
 
-                    this.bot.action('ponchik', (ponCtx) => {
-                        ponCtx.reply('В ответ на это сообщение пришлите список каналов для добавления в отслеживаемые\n⚠️ Каждый канал должен начинаться с новой строки')
-                    });
+                            this.bot.action('ponchik', async (ponCtx) => {
+                                settingsAddCtx.deleteMessage(await possibleDeleted1);
+                                idkCtx.deleteMessage(await possibleDeleted2);
+                                ponCtx.reply('👉🏼 В ответ на это сообщение пришлите список каналов для добавления в отслеживаемые\n\n⚠️ Каждый канал должен начинаться с новой строки')
+                            });
+                        });
 
-                    /**
-                     * Слушаем сообщение пользователя
-                     */
-                    this.bot.on('text', async (updateCtx) => {
-                        const message = updateCtx.message;
-                        const userId = message.from.id;
-                        // @ts-ignore
-                        if (message && message.reply_to_message && message.reply_to_message.from.is_bot) {
-                            const parsedChannels = validator.parseChannelsFromMessage(message.text);
+                        /**
+                         * Слушаем сообщение пользователя
+                         */
+                        this.bot.on('text', async (updateCtx) => {
+                            const message = updateCtx.message;
+                            const userId = message.from.id;
+                            // @ts-ignore
+                            if (message && message.reply_to_message && message.reply_to_message.from.is_bot) {
+                                const parsedChannels = validator.parseChannelsFromMessage(message.text);
 
-                            if (typeof parsedChannels === 'string') {
-                                updateCtx.reply(parsedChannels);
-                            } else {
-                                this.filterController.addUserChannels(userId, parsedChannels)
-                                updateCtx.reply('Список каналов успешно обновлен 👍🏼')
+                                if (typeof parsedChannels === 'string') {
+                                    updateCtx.reply(parsedChannels);
+                                } else {
+                                    if (userFilter.channels.length + parsedChannels.length > 5) {
+                                        updateCtx.reply(`Превышен лимит на добавление каналов 👀\nВы можете добавить еще ${5 - userFilter.channels.length}`)
+                                    } else {
+                                        this.filterController.addUserChannels(userId, parsedChannels);
+                                        updateCtx.reply('Список каналов успешно обновлен 👍🏼');
+                                    }
+                                }
                             }
-                        }
-                    });
+                        });
+                    }
                 });
 
                 this.bot.hears('Удалить ➖', (settingsAddCtx) => {
-                    settingsAddCtx.reply('*Функция удаления каналов из списка отслеживаемых*\n\nВ ответ на это сообщение пришлите список каналов для удаления из отслеживаемых\n⚠️ Каждый канал должен начинаться с новой строки', {
+                    settingsAddCtx.reply('👉🏼 В ответ на это сообщение пришлите список каналов для удаления из отслеживаемых\n\n⚠️ Каждый канал должен начинаться с новой строки', {
                         parse_mode: 'Markdown'
                     });
 
                     this.bot.on('text', async (updateCtx) => {
                         const message = updateCtx.message;
                         const userId = message.from.id;
-                        // @ts-ignore
-                        if (message && message.reply_to_message && message.reply_to_message.from.is_bot) {
+                        console.log(message);
+                        if (message
+                            && message.reply_to_message
+                            // @ts-ignore
+                            && (message.reply_to_message.text as string).includes('В ответ на это сообщение пришлите список каналов для удаления')) {
                             const parsedChannels = validator.parseChannelsFromMessage(message.text);
 
                             if (typeof parsedChannels === 'string') {

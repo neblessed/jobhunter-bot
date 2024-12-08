@@ -4,8 +4,9 @@ class MessageValidator {
     parseChannelsFromMessage(message: string): string[] | string {
         let channels: string[] | string = [];
         message.split('\n').forEach(channel => {
-            if (this.regexp.test(channel)) {
-                (channels as string[]).push(channel);
+            const c = channel.replace('@', '').trim();
+            if (this.regexp.test(c)) {
+                (channels as string[]).push(c);
             } else {
                 channels = '❗ Ошибка парсинга каналов\nПроверьте что в сообщении не содержится ошибок';
             }
