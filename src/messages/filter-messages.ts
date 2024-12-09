@@ -30,6 +30,6 @@ export class FilterMessages {
     }
 
     filterResult(ctx: Context, filter: UserFilterType) {
-        ctx.editMessageText(`Создать ваш фильтр?\n\nПозиция: ${filter.position}\nГрейд: ${filter.grade}\nТип занятости: ${filter.type}\nЗП: ${filter.salary}\nЛокация: ${filter.location}\nЯП: ${filter.lang}`, Markup.inlineKeyboard([Markup.button.callback('Да', 'create-filter'), Markup.button.callback('Нет', 'revoke-filter')]))
+        ctx.editMessageText(`Создать ваш фильтр?\n\nПозиция: ${filter.position}\nГрейд: ${filter.grade}\nТип занятости: ${filter.type}\nЯП: ${filter.lang}`, Markup.inlineKeyboard([Markup.button.callback('Да', 'create-filter'), Markup.button.callback('Нет', 'revoke-filter')]))
     }
 }

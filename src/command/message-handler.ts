@@ -57,7 +57,7 @@ export class MessageHandler extends Command {
                 const userFilter = this.filterController.getUserFilterFromStorage(userId);
 
                 if (userFilter) {
-                    ctx.reply(`Позиция: ${userFilter.position}\nГрейд: ${userFilter.grade}\nТип занятости: ${userFilter.type}\nЗП: ${userFilter.salary}\nЛокация: ${userFilter.location}\nЯП: ${userFilter.lang}`);
+                    ctx.reply(`Позиция: ${userFilter.position}\nГрейд: ${userFilter.grade}\nТип занятости: ${userFilter.type}\nЯП: ${userFilter.lang}`);
                 } else {
                     ctx.reply('Вы ещё не создали ни одного фильтра ❌');
                 }
@@ -154,80 +154,80 @@ export class MessageHandler extends Command {
                  */
                 this.bot.action(actions.type.noMatter, (ctx) => {
                     this.filterController.addKeyInFilter('type', 'Не важно');
-                    this.filterMessages.location(ctx);
+                    this.filterMessages.programmingLanguage(ctx);
                 });
                 this.bot.action(actions.type.office, (ctx) => {
                     this.filterController.addKeyInFilter('type', 'Офис');
-                    this.filterMessages.location(ctx);
+                    this.filterMessages.programmingLanguage(ctx);
                 });
                 this.bot.action(actions.type.hybrid, (ctx) => {
                     this.filterController.addKeyInFilter('type', 'Гибрид');
-                    this.filterMessages.location(ctx);
+                    this.filterMessages.programmingLanguage(ctx);
                 });
                 this.bot.action(actions.type.remote, (ctx) => {
                     this.filterController.addKeyInFilter('type', 'Удаленно');
-                    this.filterMessages.location(ctx);
-                });
-
-                /**
-                 * Handle "location" actions
-                 */
-                this.bot.action(actions.location.noMatter, (ctx) => {
-                    this.filterController.addKeyInFilter('location', 'Не важно');
-                    this.filterMessages.salary(ctx);
-                });
-                this.bot.action(actions.location.ru, (ctx) => {
-                    this.filterController.addKeyInFilter('location', 'Россия');
-                    this.filterMessages.salary(ctx);
-                });
-                this.bot.action(actions.location.rb, (ctx) => {
-                    this.filterController.addKeyInFilter('location', 'Беларусь');
-                    this.filterMessages.salary(ctx);
-                });
-                this.bot.action(actions.location.kz, (ctx) => {
-                    this.filterController.addKeyInFilter('location', 'Казахстан');
-                    this.filterMessages.salary(ctx);
-                });
-                this.bot.action(actions.location.rs, (ctx) => {
-                    this.filterController.addKeyInFilter('location', 'Сербия');
-                    this.filterMessages.salary(ctx);
-                });
-                this.bot.action(actions.location.tr, (ctx) => {
-                    this.filterController.addKeyInFilter('location', 'Турция');
-                    this.filterMessages.salary(ctx);
-                });
-                this.bot.action(actions.location.de, (ctx) => {
-                    this.filterController.addKeyInFilter('location', 'Германия');
-                    this.filterMessages.salary(ctx);
-                });
-                this.bot.action(actions.location.uk, (ctx) => {
-                    this.filterController.addKeyInFilter('location', 'Великобритания');
-                    this.filterMessages.salary(ctx);
-                });
-                this.bot.action(actions.location.usa, (ctx) => {
-                    this.filterController.addKeyInFilter('location', 'США');
-                    this.filterMessages.salary(ctx);
-                });
-
-                /**
-                 * Handle "salary" actions
-                 */
-                this.bot.action(actions.salary.noMatter, (ctx) => {
-                    this.filterController.addKeyInFilter('salary', 'Не важно');
                     this.filterMessages.programmingLanguage(ctx);
                 });
-                this.bot.action(actions.salary.k80, (ctx) => {
-                    this.filterController.addKeyInFilter('salary', 'от 80k RUB');
-                    this.filterMessages.programmingLanguage(ctx);
-                });
-                this.bot.action(actions.salary.k150, (ctx) => {
-                    this.filterController.addKeyInFilter('salary', 'от 150k RUB');
-                    this.filterMessages.programmingLanguage(ctx);
-                });
-                this.bot.action(actions.salary.k250, (ctx) => {
-                    this.filterController.addKeyInFilter('salary', 'от 250k RUB');
-                    this.filterMessages.programmingLanguage(ctx);
-                });
+                //
+                // /**
+                //  * Handle "location" actions
+                //  */
+                // this.bot.action(actions.location.noMatter, (ctx) => {
+                //     this.filterController.addKeyInFilter('location', 'Не важно');
+                //     this.filterMessages.salary(ctx);
+                // });
+                // this.bot.action(actions.location.ru, (ctx) => {
+                //     this.filterController.addKeyInFilter('location', 'Россия');
+                //     this.filterMessages.salary(ctx);
+                // });
+                // this.bot.action(actions.location.rb, (ctx) => {
+                //     this.filterController.addKeyInFilter('location', 'Беларусь');
+                //     this.filterMessages.salary(ctx);
+                // });
+                // this.bot.action(actions.location.kz, (ctx) => {
+                //     this.filterController.addKeyInFilter('location', 'Казахстан');
+                //     this.filterMessages.salary(ctx);
+                // });
+                // this.bot.action(actions.location.rs, (ctx) => {
+                //     this.filterController.addKeyInFilter('location', 'Сербия');
+                //     this.filterMessages.salary(ctx);
+                // });
+                // this.bot.action(actions.location.tr, (ctx) => {
+                //     this.filterController.addKeyInFilter('location', 'Турция');
+                //     this.filterMessages.salary(ctx);
+                // });
+                // this.bot.action(actions.location.de, (ctx) => {
+                //     this.filterController.addKeyInFilter('location', 'Германия');
+                //     this.filterMessages.salary(ctx);
+                // });
+                // this.bot.action(actions.location.uk, (ctx) => {
+                //     this.filterController.addKeyInFilter('location', 'Великобритания');
+                //     this.filterMessages.salary(ctx);
+                // });
+                // this.bot.action(actions.location.usa, (ctx) => {
+                //     this.filterController.addKeyInFilter('location', 'США');
+                //     this.filterMessages.salary(ctx);
+                // });
+                //
+                // /**
+                //  * Handle "salary" actions
+                //  */
+                // this.bot.action(actions.salary.noMatter, (ctx) => {
+                //     this.filterController.addKeyInFilter('salary', 'Не важно');
+                //     this.filterMessages.programmingLanguage(ctx);
+                // });
+                // this.bot.action(actions.salary.k80, (ctx) => {
+                //     this.filterController.addKeyInFilter('salary', 'от 80k RUB');
+                //     this.filterMessages.programmingLanguage(ctx);
+                // });
+                // this.bot.action(actions.salary.k150, (ctx) => {
+                //     this.filterController.addKeyInFilter('salary', 'от 150k RUB');
+                //     this.filterMessages.programmingLanguage(ctx);
+                // });
+                // this.bot.action(actions.salary.k250, (ctx) => {
+                //     this.filterController.addKeyInFilter('salary', 'от 250k RUB');
+                //     this.filterMessages.programmingLanguage(ctx);
+                // });
 
                 /**
                  * Handle "programming language" actions
