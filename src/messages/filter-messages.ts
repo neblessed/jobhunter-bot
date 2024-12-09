@@ -1,6 +1,6 @@
 import {InlineKeyboards} from "../keyboards/inline";
 import {Context, Markup} from "telegraf";
-import {UserFilterType} from "../controllers/filter/types/filter.type";
+import {UserFilterType} from "../types/filter.type";
 
 export class FilterMessages {
     private inlineKeyboards = new InlineKeyboards();

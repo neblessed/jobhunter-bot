@@ -1,5 +1,7 @@
 import * as fs from "fs";
-import {UserFilterType} from "./types/filter.type";
+import {UserFilterType} from "../../types/filter.type";
+import {FilterAlias} from "../../utils/filter-alias";
+import {actions} from "../../utils/actions/filter.actions";
 
 export class FilterController {
     private path = 'src/storage/user-filters.json';
@@ -123,5 +125,110 @@ export class FilterController {
 
             this.updateStorage({filters})
         }
+    }
+
+    getAliasesByFilter(filter: UserFilterType) {
+        const alias = new FilterAlias();
+        const {position, grade, type, lang} = filter;
+        const aliases = {} as {
+            position: string[],
+            grade: string[],
+            employmentType: string[],
+            programmingLanguage: string[]
+        };
+
+        switch (position) {
+            case 'QA Engineer': {
+                aliases.position = alias.positions.QA;
+                break;
+            }
+            case 'QA Automation': {
+                aliases.position = alias.positions.AQA;
+                break;
+            }
+            case 'Frontend Developer': {
+                aliases.position = alias.positions.Frontend;
+                break;
+            }
+            case 'Backend Developer': {
+                aliases.position = alias.positions.Backend;
+                break;
+            }
+        }
+
+        switch (grade) {
+            case 'Trainee': {
+                aliases.grade = alias.grades.TRAINEE;
+                break;
+            }
+            case 'Junior': {
+                aliases.grade = alias.grades.JUNIOR;
+                break;
+            }
+            case 'Middle': {
+                aliases.grade = alias.grades.MIDDLE;
+                break;
+            }
+            case 'Senior': {
+                aliases.grade = alias.grades.SENIOR;
+                break;
+            }
+            case 'Lead': {
+                aliases.grade = alias.grades.LEAD;
+                break;
+            }
+        }
+
+        switch (type) {
+            case 'Не важно': {
+                aliases.employmentType = [];
+                break;
+            }
+            case 'Офис': {
+                aliases.employmentType = alias.employmentTypes.OFFICE;
+                break;
+            }
+            case 'Гибрид': {
+                aliases.employmentType = alias.employmentTypes.HYBRID;
+                break;
+            }
+            case 'Удаленно': {
+                aliases.employmentType = alias.employmentTypes.REMOTE;
+                break;
+            }
+        }
+
+        switch (lang) {
+            case 'Не важно': {
+                aliases.employmentType = [];
+                break;
+            }
+            case 'Java': {
+                aliases.programmingLanguage = alias.languages.JAVA;
+                break;
+            }
+            case 'JS/TS': {
+                aliases.programmingLanguage = alias.languages.JAVASCRIPT_TYPESCRIPT;
+                break;
+            }
+            case 'Python': {
+                aliases.programmingLanguage = alias.languages.PYTHON;
+                break;
+            }
+            case 'Kotlin': {
+                aliases.programmingLanguage = alias.languages.KOTLIN;
+                break;
+            }
+            case 'Golang': {
+                aliases.programmingLanguage = alias.languages.GOLANG;
+                break;
+            }
+            case 'C': {
+                aliases.programmingLanguage = alias.languages.C;
+                break;
+            }
+        }
+
+        return aliases;
     }
 }

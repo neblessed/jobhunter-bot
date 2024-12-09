@@ -8,12 +8,14 @@ import {FilterController} from "../controllers/filter/filter.controller";
 import {adminUsernames} from "../controllers/auth/admin-settings";
 import {channels} from "../utils/channels/channel-mapping";
 import {validator} from "../utils/message-validator";
+import {Scheduler} from "../scheduler/scheduler.class";
 
 
 export class MessageHandler extends Command {
     private menu = new Menu();
     private filterMessages = new FilterMessages();
     private filterController = new FilterController();
+    private scheduler = new Scheduler();
 
     constructor(bot: Telegraf<IBotContext>) {
         super(bot);
@@ -31,9 +33,12 @@ export class MessageHandler extends Command {
          * Обработка команды "Включить поиск вакансий ▶"
          */
         this.bot.hears('Включить поиск вакансий ▶', (ctx) => {
-            const userFilter = this.filterController.getUserFilterFromStorage(ctx.chat.id);
+            const userId = ctx.update.message.from.id;
+            const userFilter = this.filterController.getUserFilterFromStorage(userId);
+
             if (userFilter) {
                 ctx.reply('Поиск активирован ✔', Markup.keyboard(['Остановить поиск ⏸']).resize());
+                this.scheduler.dailyFetchMessages(userId);
 
                 this.bot.hears('Остановить поиск ⏸', (ctx) => {
                     ctx.reply('Поиск приостановлен ✔', this.menu.mainMenu);
@@ -308,7 +313,7 @@ export class MessageHandler extends Command {
 
                 this.bot.hears('Добавить ➕', (settingsAddCtx) => {
                     const currentFilter = this.filterController.getUserFilterFromStorage(settingsAddCtx.update.message.from.id)!;
-                    if (currentFilter.channels.length === 5) {
+                    if ((currentFilter.channels.length - channels.baseChannels.length) === 5) {
                         settingsAddCtx.reply('У вас уже добавлено не менее 5 каналов. Это максимум 👀')
                     } else {
                         const possibleDeleted1 = settingsAddCtx.reply('👉🏼 В ответ на это сообщение пришлите список каналов для добавления в отслеживаемые\n\n⚠️ Каждый канал должен начинаться с новой строки', {
@@ -356,12 +361,13 @@ export class MessageHandler extends Command {
                         const messageText = message.reply_to_message.text as string;
 
                         if (messageText.includes('список каналов для добавления')) {
-                            const {channels} = this.filterController.getUserFilterFromStorage(userId)!;
+                            const userChannels = this.filterController.getUserFilterFromStorage(userId)!.channels;
+
                             if (typeof parsedChannels === 'string') {
                                 updateCtx.reply(parsedChannels);
                             } else {
-                                if (channels.length + parsedChannels.length > 5) {
-                                    updateCtx.reply(`Превышен лимит на добавление каналов 👀\nВы можете добавить еще ${5 - channels.length}`)
+                                if ((userChannels.length + parsedChannels.length) - channels.baseChannels.length > 5) {
+                                    updateCtx.reply(`Превышен лимит на добавление каналов 👀\nВы можете добавить еще ${5 - (channels.baseChannels.length - userChannels.length)}`)
                                 } else {
                                     this.filterController.addUserChannels(userId, parsedChannels);
                                     updateCtx.reply('Список каналов успешно обновлен 👍🏼');

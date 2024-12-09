@@ -4,11 +4,15 @@
       "user_id": 765707926,
       "position": "QA Automation",
       "channels": [
-        "qa_jobs"
+        "qa_jobs",
+        "myresume_ru",
+        "jobGeeks",
+        "theyseeku",
+        "HR_Prime1"
       ],
-      "grade": "Middle",
+      "grade": "Senior",
       "type": "Удаленно",
-      "lang": "JS/TS"
+      "lang": "Python"
     }
   ]
 }
